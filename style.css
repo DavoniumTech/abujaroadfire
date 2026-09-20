@@ -342,6 +342,39 @@ html,body{
   margin-bottom:10px;
 }
 
+.name-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:8px;
+}
+
+.name-row label{
+  font-size:10px;
+  letter-spacing:1.5px;
+  color:var(--text-dim);
+}
+
+.name-input{
+  pointer-events:auto;
+  flex:1;
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--panel-border);
+  border-radius:8px;
+  color:var(--text);
+  padding:8px 10px;
+  font-size:13px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  min-width:0;
+}
+
+.name-input:focus{
+  outline:none;
+  border-color:var(--teal);
+}
+
 .stat-row{
   display:flex;
   justify-content:space-between;
@@ -470,4 +503,3 @@ html,body{
   .brand{ margin-top:calc(3vh + var(--safe-top)); }
   .ready-text{ font-size:54px; }
 }
-
