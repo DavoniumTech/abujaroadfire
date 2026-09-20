@@ -26,7 +26,13 @@
 <body>
   <main id="game-root" aria-label="Abuja Roadfire game">
 
-    <!-- GAME CANVAS -->
+    <!-- =====================================================
+         GAME CANVAS
+         All procedural environments, characters, vehicles,
+         lighting, road perspective, particles, and effects
+         are rendered by script.js.
+    ====================================================== -->
+
     <canvas
       id="game-canvas"
       width="1280"
@@ -34,7 +40,11 @@
       aria-label="ABUJA ROADFIRE gameplay canvas"
     ></canvas>
 
-    <!-- ACCESSIBILITY / SYSTEM STATUS -->
+
+    <!-- =====================================================
+         ACCESSIBILITY / SYSTEM STATUS
+    ====================================================== -->
+
     <div
       id="aria-status"
       class="sr-only"
@@ -48,7 +58,11 @@
       aria-live="assertive"
     ></div>
 
-    <!-- CINEMATIC SPLASH SCREEN -->
+
+    <!-- =====================================================
+         CINEMATIC SPLASH SCREEN
+    ====================================================== -->
+
     <section
       id="screen-splash"
       class="screen"
@@ -95,7 +109,6 @@
           class="splash-loading"
           aria-label="Loading game"
         >
-
           <div
             class="splash-bar"
             role="progressbar"
@@ -117,24 +130,26 @@
           >
             INITIALIZING ROAD SYSTEMS...
           </p>
-
         </div>
 
       </div>
 
     </section>
 
-    <!-- MAIN MENU -->
+
+    <!-- =====================================================
+         MAIN MENU
+         The canvas continues rendering a living environment
+         behind this transparent menu layer.
+    ====================================================== -->
+
     <section
       id="screen-menu"
       class="screen hidden"
       aria-label="Main menu"
     >
 
-      <div
-        class="menu-atmosphere"
-        aria-hidden="true"
-      ></div>
+      <div class="menu-atmosphere" aria-hidden="true"></div>
 
       <div class="brand">
 
@@ -202,7 +217,11 @@
 
     </section>
 
-    <!-- GAMEPLAY HUD -->
+
+    <!-- =====================================================
+         GAMEPLAY HUD
+    ====================================================== -->
+
     <section
       id="hud"
       class="hidden"
@@ -248,6 +267,7 @@
 
       </div>
 
+
       <div class="hud-mid">
 
         <div
@@ -263,10 +283,7 @@
           class="hud-powerup hidden"
           aria-live="polite"
         >
-
-          <div id="hud-powerup-name">
-            NO POWER-UP
-          </div>
+          <div id="hud-powerup-name">NO POWER-UP</div>
 
           <div class="powerup-bar">
             <div
@@ -274,7 +291,6 @@
               class="powerup-fill"
             ></div>
           </div>
-
         </div>
 
         <div
@@ -287,13 +303,13 @@
 
       </div>
 
+
       <div class="hud-bottom">
 
         <div
           class="hud-lives"
           aria-label="Remaining lives"
         >
-
           <span
             id="life-1"
             class="life-icon"
@@ -311,7 +327,6 @@
             class="life-icon"
             aria-label="Life 3 available"
           ></span>
-
         </div>
 
         <div
@@ -326,7 +341,12 @@
 
     </section>
 
-    <!-- MOBILE GESTURE ASSISTANCE -->
+
+    <!-- =====================================================
+         MOBILE GESTURE ASSISTANCE
+         No giant keypad controls.
+         Actual gestures are handled in script.js.
+    ====================================================== -->
 
     <div
       id="touch-feedback"
@@ -342,7 +362,10 @@
       SWIPE TO MOVE
     </div>
 
-    <!-- READY / COUNTDOWN OVERLAY -->
+
+    <!-- =====================================================
+         READY / COUNTDOWN OVERLAY
+    ====================================================== -->
 
     <section
       id="screen-ready"
@@ -374,10 +397,13 @@
 
     </section>
 
-    <!-- PAUSE SCREEN -->
+
+    <!-- =====================================================
+         PAUSE SCREEN
+    ====================================================== -->
 
     <section
-      id="screen-pause"
+      id="screen-paused"
       class="screen overlay hidden"
       aria-label="Paused game"
     >
@@ -422,7 +448,10 @@
 
     </section>
 
-    <!-- HOW TO PLAY SCREEN -->
+
+    <!-- =====================================================
+         HOW TO PLAY SCREEN
+    ====================================================== -->
 
     <section
       id="screen-howto"
@@ -494,7 +523,10 @@
 
     </section>
 
-    <!-- LEADERBOARD SCREEN -->
+
+    <!-- =====================================================
+         LEADERBOARD SCREEN
+    ====================================================== -->
 
     <section
       id="screen-leaderboard"
@@ -518,11 +550,9 @@
           id="leaderboard-list"
           class="leaderboard-list"
         >
-
           <li class="leaderboard-empty">
             No scores recorded yet.
           </li>
-
         </ol>
 
         <button
@@ -537,7 +567,10 @@
 
     </section>
 
-    <!-- SETTINGS SCREEN -->
+
+    <!-- =====================================================
+         SETTINGS SCREEN
+    ====================================================== -->
 
     <section
       id="screen-settings"
@@ -609,10 +642,13 @@
 
     </section>
 
-    <!-- RESET CONFIRMATION SCREEN -->
+
+    <!-- =====================================================
+         RESET CONFIRMATION SCREEN
+    ====================================================== -->
 
     <section
-      id="screen-confirm"
+      id="screen-reset-confirm"
       class="screen overlay hidden"
       aria-label="Confirm reset"
     >
@@ -649,10 +685,13 @@
 
     </section>
 
-    <!-- GAME OVER SCREEN -->
+
+    <!-- =====================================================
+         GAME OVER SCREEN
+    ====================================================== -->
 
     <section
-      id="screen-gameover"
+      id="screen-game-over"
       class="screen overlay hidden"
       aria-label="Game over"
     >
@@ -756,7 +795,10 @@
 
     </section>
 
-    <!-- SHARE SCREEN -->
+
+    <!-- =====================================================
+         SHARE SCREEN
+    ====================================================== -->
 
     <section
       id="screen-share"
@@ -817,7 +859,10 @@
 
     </section>
 
-    <!-- TEMPORARY EVENT NOTIFICATION -->
+
+    <!-- =====================================================
+         TEMPORARY EVENT NOTIFICATION
+    ====================================================== -->
 
     <div
       id="event-toast"
@@ -829,7 +874,10 @@
       <span id="event-toast-text">READY</span>
     </div>
 
-    <!-- POWER-UP NOTIFICATION -->
+
+    <!-- =====================================================
+         POWER-UP NOTIFICATION
+    ====================================================== -->
 
     <div
       id="powerup-notification"
@@ -837,13 +885,15 @@
       aria-live="polite"
     >
       <span id="powerup-notification-name">BOOST</span>
-
       <span id="powerup-notification-description">
         SPEED INCREASED
       </span>
     </div>
 
-    <!-- CRASH / IMPACT FLASH -->
+
+    <!-- =====================================================
+         CRASH / IMPACT FLASH
+    ====================================================== -->
 
     <div
       id="impact-flash"
@@ -851,7 +901,10 @@
       aria-hidden="true"
     ></div>
 
-    <!-- SCREEN VIGNETTE -->
+
+    <!-- =====================================================
+         SCREEN VIGNETTE
+    ====================================================== -->
 
     <div
       id="screen-vignette"
@@ -859,7 +912,11 @@
       aria-hidden="true"
     ></div>
 
-    <!-- DAVONIUM AD PLACEHOLDER -->
+
+    <!-- =====================================================
+         DAVONIUM AD PLACEHOLDER
+         No real advertising SDK is included.
+    ====================================================== -->
 
     <div
       id="davonium-ad-slot"
@@ -871,7 +928,11 @@
 
   </main>
 
-  <!-- JAVASCRIPT APPLICATION -->
+
+  <!-- =======================================================
+       JAVASCRIPT APPLICATION
+       The complete game engine will be supplied in script.js.
+  ======================================================== -->
 
   <script src="script.js" defer></script>
 
