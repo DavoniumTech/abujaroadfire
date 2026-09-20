@@ -41,7 +41,7 @@
   };
 
   const STATE = {
-    MENU: "MENU", READY: "READY", PLAYING: "PLAYING", PAUSED: "PAUSED",
+    SPLASH: "SPLASH", MENU: "MENU", READY: "READY", PLAYING: "PLAYING", PAUSED: "PAUSED",
     GAME_OVER: "GAME_OVER", SETTINGS: "SETTINGS", LEADERBOARD: "LEADERBOARD",
     HOWTO: "HOWTO",
   };
@@ -144,6 +144,7 @@
 
   const el = (id) => document.getElementById(id);
   const screens = {
+    splash: el("screen-splash"),
     menu: el("screen-menu"), ready: el("screen-ready"), pause: el("screen-pause"),
     gameover: el("screen-gameover"), howto: el("screen-howto"),
     leaderboard: el("screen-leaderboard"), settings: el("screen-settings"),
@@ -220,11 +221,48 @@
   /* =========================== GAME STATE (per run) =========================== */
 
   let game = null;
-  let appState = STATE.MENU;
+  let appState = STATE.SPLASH;
   let lastTime = 0;
   let readyTimer = 0;
+  let splashTimer = 0;
   let pendingConfirm = null;
   let activeLeaderboardEntry = null;
+
+  const SPLASH_MIN_TIME = 2.6; // guaranteed minimum so the branding is actually seen
+  const SPLASH_MESSAGES = ["LOADING WORLD…", "FUELING UP…", "IGNITING ENGINE…", "READY TO RIDE"];
+
+  function spawnSplashParticles() {
+    const host = el("splash-particles");
+    if (!host) return;
+    const count = reducedMotion ? 0 : 22;
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement("span");
+      const left = Math.random() * 100;
+      const dur = 4 + Math.random() * 5;
+      const delay = Math.random() * 6;
+      const drift = (Math.random() - 0.5) * 60;
+      s.style.left = left + "%";
+      s.style.animationDuration = dur + "s";
+      s.style.animationDelay = delay + "s";
+      s.style.setProperty("--drift", drift + "px");
+      s.style.opacity = (0.3 + Math.random() * 0.5).toFixed(2);
+      host.appendChild(s);
+    }
+  }
+
+  function startSplash() {
+    appState = STATE.SPLASH;
+    splashTimer = 0;
+    screens.splash.classList.remove("splash-out", "hidden");
+    spawnSplashParticles();
+    showOnly(["splash"]);
+  }
+
+  function finishSplash() {
+    screens.splash.classList.add("splash-out");
+    setTimeout(() => { screens.splash.classList.add("hidden"); }, 700);
+    goMenu();
+  }
 
   function freshGame() {
     return {
@@ -810,37 +848,102 @@
     ctx.fill();
   }
 
+  /* Layered cityscape: distant hills -> far hazy building band -> nearer
+     detailed band with rooftop props. Each layer scrolls at its own rate
+     driven by world.time so the skyline reads as genuine parallax depth
+     rather than a single static silhouette. */
+
   function drawSkyline() {
     const night = isNight();
+    const { mix, phase } = dayPhase(world.dayTimer);
+    const hazeMix = phase === "sunset" ? mix : 0;
     ctx.save();
-    ctx.fillStyle = "rgba(70,90,80,0.35)";
+
+    // ---- layer 1: distant hills (slowest, atmospheric haze) ----
+    ctx.fillStyle = night ? "rgba(18,24,38,0.55)" : lerpColor("rgba(120,140,150,0.4)", "rgba(255,170,120,0.4)", hazeMix);
     ctx.beginPath();
     ctx.moveTo(0, horizonY);
-    for (let x = 0; x <= W; x += 40) ctx.lineTo(x, horizonY - 14 - 10 * Math.sin(x * 0.01 + 2));
+    const hillScroll = world.time * 1.2;
+    for (let x = 0; x <= W; x += 30) {
+      ctx.lineTo(x, horizonY - 20 - 14 * Math.sin((x + hillScroll) * 0.006 + 1.3) - 8 * Math.sin((x + hillScroll) * 0.017));
+    }
     ctx.lineTo(W, horizonY);
     ctx.closePath();
     ctx.fill();
 
-    const seed = 12345;
-    let rx = 0, i = 0;
-    while (rx < W) {
-      const bw = 30 + ((seed * (i + 1)) % 40);
-      const bh = 24 + ((seed * (i + 3)) % 70);
-      const bx = rx, by = horizonY - bh;
-      ctx.fillStyle = night ? "rgba(20,26,46,0.9)" : "rgba(60,70,90,0.55)";
-      ctx.fillRect(bx, by, bw - 4, bh);
-      if (night) {
-        ctx.fillStyle = "rgba(255,210,120,0.85)";
-        for (let wy = by + 6; wy < horizonY - 6; wy += 9) {
-          for (let wx = bx + 4; wx < bx + bw - 8; wx += 8) {
-            const flicker = (Math.sin(world.time * 0.6 + wx + wy) + 1) / 2;
-            if ((wx + wy) % 3 === 0 && flicker > 0.15) ctx.fillRect(wx, wy, 3, 3);
+    // ---- layer 2: far building band (hazy, small, medium scroll) ----
+    drawBuildingBand({
+      scroll: world.time * 4,
+      baseY: horizonY,
+      minH: 16, maxH: 46, minW: 22, maxW: 34, gap: 6,
+      color: night ? "rgba(14,18,32,0.75)" : "rgba(90,105,125,0.4)",
+      windowColor: "rgba(255,205,120,0.55)",
+      windowChance: 0.22,
+      night, seedBase: 7001, detail: false,
+    });
+
+    // ---- layer 3: near building band (crisper, taller, faster scroll, rooftop props) ----
+    drawBuildingBand({
+      scroll: world.time * 9,
+      baseY: horizonY + 2,
+      minH: 30, maxH: 92, minW: 34, maxW: 56, gap: 4,
+      color: night ? "rgba(10,13,24,0.94)" : "rgba(55,64,82,0.62)",
+      windowColor: night ? "rgba(255,215,140,0.9)" : "rgba(190,220,255,0.55)",
+      windowChance: 0.5,
+      night, seedBase: 4231, detail: true,
+    });
+
+    ctx.restore();
+  }
+
+  function drawBuildingBand(opts) {
+    const { scroll, baseY, minH, maxH, minW, maxW, gap, color, windowColor, windowChance, night, seedBase, detail } = opts;
+    const span = maxW + gap + 40;
+    const startIdx = Math.floor((scroll) / span) - 1;
+    const offset = -(scroll % span);
+    let i = startIdx;
+    let x = offset - span;
+    while (x < W + span) {
+      const h = minH + ((seedBase * (i + 7) * 13) % (maxH - minH));
+      const bw = minW + ((seedBase * (i + 3) * 29) % (maxW - minW));
+      const bx = x, by = baseY - h;
+      ctx.fillStyle = color;
+      ctx.fillRect(bx, by, bw, h + 6);
+
+      if (detail) {
+        // rooftop silhouette variety: antenna, water tank, or flat ledge
+        const roofKind = (seedBase * (i + 11)) % 3;
+        ctx.fillStyle = color;
+        if (roofKind === 0) {
+          ctx.fillRect(bx + bw * 0.4, by - h * 0.18, bw * 0.06, h * 0.18);
+        } else if (roofKind === 1) {
+          ctx.beginPath();
+          ctx.arc(bx + bw * 0.28, by - 3, bw * 0.14, Math.PI, 0);
+          ctx.fill();
+        } else {
+          ctx.fillRect(bx + bw * 0.15, by - 5, bw * 0.7, 5);
+        }
+      }
+
+      const winCols = Math.max(2, Math.floor(bw / 9));
+      const winRows = Math.max(2, Math.floor(h / 10));
+      ctx.fillStyle = windowColor;
+      for (let r = 0; r < winRows; r++) {
+        for (let c = 0; c < winCols; c++) {
+          const wx = bx + 4 + c * 9;
+          const wy = by + 5 + r * 10;
+          const flicker = night ? (Math.sin(world.time * 0.5 + wx * 0.7 + wy) + 1) / 2 : 1;
+          const lit = ((seedBase + c * 13 + r * 7 + i * 5) % 100) / 100 < windowChance;
+          if (lit && (!night || flicker > 0.1) && wy < by + h - 2 && wx < bx + bw - 5) {
+            ctx.globalAlpha = night ? 0.55 + flicker * 0.45 : 0.7;
+            ctx.fillRect(wx, wy, 3.2, 4);
           }
         }
       }
-      rx += bw; i++;
+      ctx.globalAlpha = 1;
+      x += bw + gap;
+      i++;
     }
-    ctx.restore();
   }
 
   function drawGround() {
@@ -1065,6 +1168,16 @@
     ctx.fillStyle = "rgba(200,230,255,0.75)";
     roundRect(-w * 0.36, -h * 0.62, w * 0.72, h * 0.28, 4 * scale);
     ctx.fill();
+
+    if (kind !== "moto") {
+      // roofline pillar + side mirrors for a less flat, more recognizable silhouette
+      ctx.strokeStyle = "rgba(0,0,0,0.3)";
+      ctx.lineWidth = 1.5 * scale;
+      ctx.beginPath(); ctx.moveTo(-w * 0.02, -h * 0.62); ctx.lineTo(-w * 0.02, -h * 0.34); ctx.stroke();
+      ctx.fillStyle = bodyColor;
+      roundRect(-w * 0.52, -h * 0.5, w * 0.06, h * 0.1, 2 * scale); ctx.fill();
+      roundRect(w * 0.46, -h * 0.5, w * 0.06, h * 0.1, 2 * scale); ctx.fill();
+    }
 
     ctx.fillStyle = "#111";
     ctx.beginPath(); ctx.arc(-w * 0.32, h * 0.05, h * 0.16, 0, Math.PI * 2); ctx.fill();
@@ -1499,7 +1612,18 @@
 
     if (appState !== STATE.PAUSED) updateWorld(dt);
 
-    if (appState === STATE.READY) {
+    if (appState === STATE.SPLASH) {
+      splashTimer += dt;
+      const pct = Math.min(1, splashTimer / SPLASH_MIN_TIME);
+      const fill = el("splash-bar-fill");
+      if (fill) fill.style.width = (pct * 100).toFixed(1) + "%";
+      const label = el("splash-loading-text");
+      if (label) {
+        const idx = Math.min(SPLASH_MESSAGES.length - 1, Math.floor(pct * SPLASH_MESSAGES.length));
+        if (label.textContent !== SPLASH_MESSAGES[idx]) label.textContent = SPLASH_MESSAGES[idx];
+      }
+      if (pct >= 1) finishSplash();
+    } else if (appState === STATE.READY) {
       readyTimer += dt;
       const text = el("ready-text");
       if (readyTimer < 0.8) text.textContent = "READY";
@@ -1626,7 +1750,7 @@
   /* =========================== INITIALIZATION =========================== */
 
   wireUI();
-  goMenu();
+  startSplash();
 
   // --- DAVONIUM AD PLACEHOLDER ---
   // Future AdMob / AdSense integration can be added here.
