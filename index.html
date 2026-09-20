@@ -1,1 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Abuja Roadfire — Davonium Technologies</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="game-root">
+
+    <canvas id="game-canvas"></canvas>
+
+    <!-- ===================== HUD (in-game) ===================== -->
+    <div id="hud" class="hidden">
+      <div class="hud-top">
+        <div class="hud-pill hud-score">
+          <span class="hud-label">SCORE</span>
+          <span id="hud-score-value">0</span>
+        </div>
+        <div class="hud-pill hud-best">
+          <span class="hud-label">BEST</span>
+          <span id="hud-best-value">0</span>
+        </div>
+        <button id="btn-pause" class="icon-btn" aria-label="Pause">❚❚</button>
+      </div>
+      <div class="hud-mid">
+        <div id="hud-combo" class="hud-combo hidden">COMBO x<span id="hud-combo-value">1</span></div>
+        <div id="hud-powerup" class="hud-powerup hidden">
+          <span id="hud-powerup-name">SHIELD</span>
+          <div class="powerup-bar"><div id="hud-powerup-fill" class="powerup-fill"></div></div>
+        </div>
+      </div>
+      <div class="hud-bottom">
+        <div id="hud-lives" class="hud-lives"></div>
+        <button id="btn-sound" class="icon-btn" aria-label="Toggle sound">🔊</button>
+      </div>
+    </div>
+
+    <!-- ===================== READY OVERLAY ===================== -->
+    <div id="screen-ready" class="screen hidden">
+      <div id="ready-text" class="ready-text">READY</div>
+    </div>
+
+    <!-- ===================== MAIN MENU ===================== -->
+    <div id="screen-menu" class="screen">
+      <div class="brand">
+        <div class="brand-company">DAVONIUM TECHNOLOGIES</div>
+        <h1 class="brand-title">ABUJA <span>ROADFIRE</span></h1>
+        <div class="brand-tagline">RIDE&nbsp;•&nbsp;DODGE&nbsp;•&nbsp;SURVIVE</div>
+      </div>
+      <div class="menu-best">BEST SCORE <span id="menu-best-value">0</span></div>
+      <div class="menu-panel">
+        <button id="btn-play" class="btn btn-primary">PLAY</button>
+        <button id="btn-howto" class="btn">HOW TO PLAY</button>
+        <button id="btn-leaderboard" class="btn">LEADERBOARD</button>
+        <button id="btn-settings" class="btn">SETTINGS</button>
+      </div>
+    </div>
+
+    <!-- ===================== PAUSE ===================== -->
+    <div id="screen-pause" class="screen overlay hidden">
+      <div class="panel">
+        <h2>PAUSED</h2>
+        <button id="btn-resume" class="btn btn-primary">RESUME</button>
+        <button id="btn-restart-pause" class="btn">RESTART</button>
+        <button id="btn-menu-pause" class="btn">MAIN MENU</button>
+      </div>
+    </div>
+
+    <!-- ===================== GAME OVER ===================== -->
+    <div id="screen-gameover" class="screen overlay hidden">
+      <div class="panel">
+        <h2 id="gameover-title">GAME OVER</h2>
+        <div id="gameover-newbest" class="newbest hidden">NEW BEST!</div>
+        <div class="stat-row"><span>FINAL SCORE</span><strong id="go-score">0</strong></div>
+        <div class="stat-row"><span>BEST SCORE</span><strong id="go-best">0</strong></div>
+        <div class="stat-row"><span>SURVIVAL TIME</span><strong id="go-time">0s</strong></div>
+        <div class="stat-row"><span>MAX COMBO</span><strong id="go-combo">x1</strong></div>
+        <button id="btn-play-again" class="btn btn-primary">PLAY AGAIN</button>
+        <button id="btn-menu-gameover" class="btn">MAIN MENU</button>
+        <button id="btn-leaderboard-gameover" class="btn">LEADERBOARD</button>
+        <button id="btn-share" class="btn">SHARE SCORE</button>
+      </div>
+    </div>
+
+    <!-- ===================== HOW TO PLAY ===================== -->
+    <div id="screen-howto" class="screen overlay hidden">
+      <div class="panel">
+        <h2>HOW TO PLAY</h2>
+        <ul class="howto-list">
+          <li>Swipe left / right (or A / D, arrow keys) to change lanes</li>
+          <li>Swipe up / tap / Space to jump over potholes</li>
+          <li>Collect fuel canisters (+50) and bonus stars (+100)</li>
+          <li>Grab SHIELD, MAGNET and BOOST power-ups</li>
+          <li>Avoid traffic and obstacles — you have 3 lives</li>
+          <li>Chain pickups without crashing to build your combo</li>
+        </ul>
+        <button id="btn-howto-close" class="btn btn-primary">GOT IT</button>
+      </div>
+    </div>
+
+    <!-- ===================== LEADERBOARD ===================== -->
+    <div id="screen-leaderboard" class="screen overlay hidden">
+      <div class="panel">
+        <h2>LOCAL LEADERBOARD</h2>
+        <ol id="leaderboard-list" class="leaderboard-list"></ol>
+        <button id="btn-leaderboard-close" class="btn btn-primary">CLOSE</button>
+      </div>
+    </div>
+
+    <!-- ===================== SETTINGS ===================== -->
+    <div id="screen-settings" class="screen overlay hidden">
+      <div class="panel">
+        <h2>SETTINGS</h2>
+        <div class="setting-row">
+          <span>SOUND</span>
+          <button id="toggle-sound" class="toggle" data-on="true"><span class="toggle-knob"></span></button>
+        </div>
+        <div class="setting-row">
+          <span>REDUCED MOTION</span>
+          <button id="toggle-motion" class="toggle" data-on="false"><span class="toggle-knob"></span></button>
+        </div>
+        <button id="btn-reset-scores" class="btn btn-danger">RESET HIGH SCORES</button>
+        <button id="btn-settings-close" class="btn btn-primary">CLOSE</button>
+      </div>
+    </div>
+
+    <!-- ===================== CONFIRM DIALOG ===================== -->
+    <div id="screen-confirm" class="screen overlay hidden">
+      <div class="panel">
+        <h2>ARE YOU SURE?</h2>
+        <p id="confirm-text">This will permanently delete your scores.</p>
+        <button id="btn-confirm-yes" class="btn btn-danger">YES, DELETE</button>
+        <button id="btn-confirm-no" class="btn">CANCEL</button>
+      </div>
+    </div>
+
+    <!-- ===================== SHARE FALLBACK ===================== -->
+    <div id="screen-share" class="screen overlay hidden">
+      <div class="panel">
+        <h2>SHARE YOUR SCORE</h2>
+        <textarea id="share-text" class="share-textarea" readonly></textarea>
+        <div id="share-status" class="share-status"></div>
+        <button id="btn-share-copy" class="btn btn-primary">COPY TO CLIPBOARD</button>
+        <button id="btn-share-close" class="btn">CLOSE</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
 
