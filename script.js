@@ -798,9 +798,8 @@ function laneToX(lane) {
   const bottomLeft = -0.38;
   const bottomRight = 0.38;
 
-  return game.width * 0.5 +
-    game.width *
-      lerp(bottomLeft, bottomRight, normalizedLane);
+  return 0.5 +
+    lerp(bottomLeft, bottomRight, normalizedLane);
 }
 
 function worldXToScreen(worldX, depth) {
