@@ -364,6 +364,48 @@
 
 
     <!-- =====================================================
+         ON-SCREEN DIRECTIONAL CONTROLS
+         Alternative to swipe gestures: left / right / jump.
+    ====================================================== -->
+
+    <div
+      id="touch-controls"
+      class="touch-controls hidden"
+      aria-label="Game controls"
+    >
+      <button
+        id="btn-move-left"
+        class="control-btn"
+        type="button"
+        aria-label="Move left"
+        title="Move left"
+      >
+        <span aria-hidden="true">&#8592;</span>
+      </button>
+
+      <button
+        id="btn-jump"
+        class="control-btn control-btn-jump"
+        type="button"
+        aria-label="Jump"
+        title="Jump"
+      >
+        <span aria-hidden="true">&#8593;</span>
+      </button>
+
+      <button
+        id="btn-move-right"
+        class="control-btn"
+        type="button"
+        aria-label="Move right"
+        title="Move right"
+      >
+        <span aria-hidden="true">&#8594;</span>
+      </button>
+    </div>
+
+
+    <!-- =====================================================
          READY / COUNTDOWN OVERLAY
     ====================================================== -->
 
