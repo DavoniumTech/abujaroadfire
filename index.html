@@ -1,177 +1,940 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Abuja Roadfire — Davonium Technologies</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  />
+
+  <meta
+    name="description"
+    content="ABUJA ROADFIRE — Ride, Dodge, Survive. An original cinematic mobile action racing experience by Davonium Technologies."
+  />
+
+  <meta name="theme-color" content="#060a12" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <title>ABUJA ROADFIRE | Davonium Technologies</title>
+
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
+  <main id="game-root" aria-label="Abuja Roadfire game">
 
-  <div id="game-root">
+    <!-- =====================================================
+         GAME CANVAS
+         All procedural environments, characters, vehicles,
+         lighting, road perspective, particles, and effects
+         are rendered by script.js.
+    ====================================================== -->
 
-    <canvas id="game-canvas"></canvas>
+    <canvas
+      id="game-canvas"
+      width="1280"
+      height="720"
+      aria-label="ABUJA ROADFIRE gameplay canvas"
+    ></canvas>
 
-    <!-- ===================== SPLASH SCREEN ===================== -->
-    <div id="screen-splash" class="screen splash">
+
+    <!-- =====================================================
+         ACCESSIBILITY / SYSTEM STATUS
+    ====================================================== -->
+
+    <div
+      id="aria-status"
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+    <div
+      id="aria-live"
+      class="sr-only"
+      aria-live="assertive"
+    ></div>
+
+
+    <!-- =====================================================
+         CINEMATIC SPLASH SCREEN
+    ====================================================== -->
+
+    <section
+      id="screen-splash"
+      class="screen"
+      aria-label="Game loading screen"
+    >
+
       <div class="splash-vignette"></div>
-      <div class="splash-particles" id="splash-particles"></div>
+
+      <div
+        class="splash-particles"
+        id="splash-particles"
+        aria-hidden="true"
+      >
+        <span style="left:5%; animation-duration:8s; animation-delay:0s;"></span>
+        <span style="left:12%; animation-duration:11s; animation-delay:1s;"></span>
+        <span style="left:20%; animation-duration:9s; animation-delay:2s;"></span>
+        <span style="left:29%; animation-duration:13s; animation-delay:0.5s;"></span>
+        <span style="left:38%; animation-duration:10s; animation-delay:3s;"></span>
+        <span style="left:46%; animation-duration:12s; animation-delay:1.5s;"></span>
+        <span style="left:55%; animation-duration:9s; animation-delay:2.5s;"></span>
+        <span style="left:64%; animation-duration:14s; animation-delay:0.8s;"></span>
+        <span style="left:73%; animation-duration:10s; animation-delay:2.2s;"></span>
+        <span style="left:82%; animation-duration:12s; animation-delay:0.4s;"></span>
+        <span style="left:91%; animation-duration:9s; animation-delay:1.8s;"></span>
+        <span style="left:97%; animation-duration:13s; animation-delay:3.2s;"></span>
+      </div>
+
       <div class="splash-content">
-        <div class="splash-company">DAVONIUM <span>TECHNOLOGIES</span></div>
+
+        <div class="splash-company">
+          <span>DAVONIUM TECHNOLOGIES</span>
+        </div>
+
         <h1 class="splash-title">
-          <span class="splash-title-line1">ABUJA</span>
-          <span class="splash-title-line2">ROADFIRE</span>
+          <span class="splash-title-line1">WELCOME TO</span>
+          <span class="splash-title-line2">ABUJA ROADFIRE</span>
         </h1>
-        <div class="splash-tagline">RIDE&nbsp;•&nbsp;DODGE&nbsp;•&nbsp;SURVIVE</div>
-        <div class="splash-loading">
-          <div class="splash-bar"><div id="splash-bar-fill" class="splash-bar-fill"></div></div>
-          <div id="splash-loading-text" class="splash-loading-text">LOADING WORLD…</div>
-        </div>
-      </div>
-    </div>
 
-    <!-- ===================== HUD (in-game) ===================== -->
-    <div id="hud" class="hidden">
-      <div class="hud-top">
-        <div class="hud-pill hud-score">
-          <span class="hud-label">SCORE</span>
-          <span id="hud-score-value">0</span>
-        </div>
-        <div class="hud-pill hud-best">
-          <span class="hud-label">BEST</span>
-          <span id="hud-best-value">0</span>
-        </div>
-        <button id="btn-pause" class="icon-btn" aria-label="Pause">❚❚</button>
-      </div>
-      <div class="hud-mid">
-        <div id="hud-combo" class="hud-combo hidden">COMBO x<span id="hud-combo-value">1</span></div>
-        <div id="hud-powerup" class="hud-powerup hidden">
-          <span id="hud-powerup-name">SHIELD</span>
-          <div class="powerup-bar"><div id="hud-powerup-fill" class="powerup-fill"></div></div>
-        </div>
-      </div>
-      <div class="hud-bottom">
-        <div id="hud-lives" class="hud-lives"></div>
-        <button id="btn-sound" class="icon-btn" aria-label="Toggle sound">🔊</button>
-      </div>
-    </div>
+        <p class="splash-tagline">
+          RIDE • DODGE • SURVIVE
+        </p>
 
-    <!-- ===================== READY OVERLAY ===================== -->
-    <div id="screen-ready" class="screen hidden">
-      <div id="ready-text" class="ready-text">READY</div>
-    </div>
+        <div
+          class="splash-loading"
+          aria-label="Loading game"
+        >
+          <div
+            class="splash-bar"
+            role="progressbar"
+            aria-label="Game loading progress"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            id="splash-progress"
+          >
+            <div
+              class="splash-bar-fill"
+              id="splash-bar-fill"
+            ></div>
+          </div>
 
-    <!-- ===================== MAIN MENU ===================== -->
-    <div id="screen-menu" class="screen">
+          <p
+            class="splash-loading-text"
+            id="splash-loading-text"
+          >
+            INITIALIZING ROAD SYSTEMS...
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MAIN MENU
+         The canvas continues rendering a living environment
+         behind this transparent menu layer.
+    ====================================================== -->
+
+    <section
+      id="screen-menu"
+      class="screen hidden"
+      aria-label="Main menu"
+    >
+
+      <div class="menu-atmosphere" aria-hidden="true"></div>
+
       <div class="brand">
-        <div class="brand-company">DAVONIUM TECHNOLOGIES</div>
-        <h1 class="brand-title">ABUJA <span>ROADFIRE</span></h1>
-        <div class="brand-tagline">RIDE&nbsp;•&nbsp;DODGE&nbsp;•&nbsp;SURVIVE</div>
+
+        <p class="brand-company">
+          DAVONIUM TECHNOLOGIES
+        </p>
+
+        <h1 class="brand-title">
+          <span>ABUJA</span>
+          <span>ROADFIRE</span>
+        </h1>
+
+        <p class="brand-tagline">
+          RIDE • DODGE • SURVIVE
+        </p>
+
       </div>
-      <div class="menu-best">BEST SCORE <span id="menu-best-value">0</span></div>
+
+      <div class="menu-best">
+        BEST SCORE:
+        <span id="menu-best-score">0</span>
+      </div>
+
       <div class="menu-panel">
-        <button id="btn-play" class="btn btn-primary">PLAY</button>
-        <button id="btn-howto" class="btn">HOW TO PLAY</button>
-        <button id="btn-leaderboard" class="btn">LEADERBOARD</button>
-        <button id="btn-settings" class="btn">SETTINGS</button>
+
+        <button
+          id="btn-play"
+          class="btn btn-primary"
+          type="button"
+        >
+          <span aria-hidden="true">▶</span>
+          PLAY
+        </button>
+
+        <button
+          id="btn-howto"
+          class="btn"
+          type="button"
+        >
+          HOW TO PLAY
+        </button>
+
+        <button
+          id="btn-leaderboard"
+          class="btn"
+          type="button"
+        >
+          LEADERBOARD
+        </button>
+
+        <button
+          id="btn-settings"
+          class="btn"
+          type="button"
+        >
+          SETTINGS
+        </button>
+
       </div>
+
+      <div class="menu-footer">
+        <span>ORIGINAL DAVONIUM EXPERIENCE</span>
+        <span id="menu-version">V1.0</span>
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         GAMEPLAY HUD
+    ====================================================== -->
+
+    <section
+      id="hud"
+      class="hidden"
+      aria-label="Gameplay information"
+    >
+
+      <div class="hud-top">
+
+        <div class="hud-pill">
+          <span class="hud-label">SCORE</span>
+          <span id="hud-score">0</span>
+        </div>
+
+        <div class="hud-pill">
+          <span class="hud-label">BEST</span>
+          <span id="hud-best">0</span>
+        </div>
+
+        <div class="hud-pill">
+          <span class="hud-label">COMBO</span>
+          <span id="hud-combo-value">X1</span>
+        </div>
+
+        <button
+          id="btn-pause"
+          class="icon-btn"
+          type="button"
+          aria-label="Pause game"
+          title="Pause"
+        >
+          <span aria-hidden="true">Ⅱ</span>
+        </button>
+
+        <button
+          id="btn-hud-sound"
+          class="icon-btn"
+          type="button"
+          aria-label="Toggle sound"
+          title="Sound"
+        >
+          <span id="hud-sound-icon" aria-hidden="true">♫</span>
+        </button>
+
+      </div>
+
+
+      <div class="hud-mid">
+
+        <div
+          id="hud-combo"
+          class="hud-combo hidden"
+          aria-live="polite"
+        >
+          COMBO X1
+        </div>
+
+        <div
+          id="hud-powerup"
+          class="hud-powerup hidden"
+          aria-live="polite"
+        >
+          <div id="hud-powerup-name">NO POWER-UP</div>
+
+          <div class="powerup-bar">
+            <div
+              id="hud-powerup-fill"
+              class="powerup-fill"
+            ></div>
+          </div>
+        </div>
+
+        <div
+          id="hud-event-message"
+          class="hud-event-message hidden"
+          aria-live="polite"
+        >
+          READY
+        </div>
+
+      </div>
+
+
+      <div class="hud-bottom">
+
+        <div
+          class="hud-lives"
+          aria-label="Remaining lives"
+        >
+          <span
+            id="life-1"
+            class="life-icon"
+            aria-label="Life 1 available"
+          ></span>
+
+          <span
+            id="life-2"
+            class="life-icon"
+            aria-label="Life 2 available"
+          ></span>
+
+          <span
+            id="life-3"
+            class="life-icon"
+            aria-label="Life 3 available"
+          ></span>
+        </div>
+
+        <div
+          id="hud-speed"
+          class="hud-pill hud-speed"
+        >
+          <span class="hud-label">SPEED</span>
+          <span id="hud-speed-value">0</span>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MOBILE GESTURE ASSISTANCE
+         No giant keypad controls.
+         Actual gestures are handled in script.js.
+    ====================================================== -->
+
+    <div
+      id="touch-feedback"
+      class="touch-feedback hidden"
+      aria-hidden="true"
+    ></div>
+
+    <div
+      id="gesture-hint"
+      class="gesture-hint hidden"
+      aria-hidden="true"
+    >
+      SWIPE TO MOVE
     </div>
 
-    <!-- ===================== PAUSE ===================== -->
-    <div id="screen-pause" class="screen overlay hidden">
-      <div class="panel">
+
+    <!-- =====================================================
+         READY / COUNTDOWN OVERLAY
+    ====================================================== -->
+
+    <section
+      id="screen-ready"
+      class="screen overlay hidden"
+      aria-label="Race countdown"
+      aria-live="assertive"
+    >
+
+      <div
+        id="ready-label"
+        class="ready-label"
+      >
+        GET READY
+      </div>
+
+      <div
+        id="ready-text"
+        class="ready-text"
+      >
+        3
+      </div>
+
+      <div
+        id="ready-subtext"
+        class="ready-subtext"
+      >
+        RIDE • DODGE • SURVIVE
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PAUSE SCREEN
+    ====================================================== -->
+
+    <section
+      id="screen-pause"
+      class="screen overlay hidden"
+      aria-label="Paused game"
+    >
+
+      <div class="panel pause-panel">
+
+        <div class="panel-kicker">
+          GAME STATUS
+        </div>
+
         <h2>PAUSED</h2>
-        <button id="btn-resume" class="btn btn-primary">RESUME</button>
-        <button id="btn-restart-pause" class="btn">RESTART</button>
-        <button id="btn-menu-pause" class="btn">MAIN MENU</button>
-      </div>
-    </div>
 
-    <!-- ===================== GAME OVER ===================== -->
-    <div id="screen-gameover" class="screen overlay hidden">
+        <p class="panel-description">
+          The road is waiting for you.
+        </p>
+
+        <button
+          id="btn-resume"
+          class="btn btn-primary"
+          type="button"
+        >
+          RESUME
+        </button>
+
+        <button
+          id="btn-restart"
+          class="btn"
+          type="button"
+        >
+          RESTART
+        </button>
+
+        <button
+          id="btn-pause-menu"
+          class="btn"
+          type="button"
+        >
+          MAIN MENU
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         HOW TO PLAY SCREEN
+    ====================================================== -->
+
+    <section
+      id="screen-howto"
+      class="screen overlay hidden"
+      aria-label="How to play"
+    >
+
       <div class="panel">
-        <h2 id="gameover-title">GAME OVER</h2>
-        <div id="gameover-newbest" class="newbest hidden">NEW BEST!</div>
-        <div class="name-row">
-          <label for="player-name-input">NAME</label>
-          <input id="player-name-input" class="name-input" type="text" maxlength="12" autocomplete="off" spellcheck="false" placeholder="PLAYER">
+
+        <div class="panel-kicker">
+          ROADFIRE TRAINING
         </div>
-        <div class="stat-row"><span>FINAL SCORE</span><strong id="go-score">0</strong></div>
-        <div class="stat-row"><span>BEST SCORE</span><strong id="go-best">0</strong></div>
-        <div class="stat-row"><span>SURVIVAL TIME</span><strong id="go-time">0s</strong></div>
-        <div class="stat-row"><span>MAX COMBO</span><strong id="go-combo">x1</strong></div>
-        <button id="btn-play-again" class="btn btn-primary">PLAY AGAIN</button>
-        <button id="btn-menu-gameover" class="btn">MAIN MENU</button>
-        <button id="btn-leaderboard-gameover" class="btn">LEADERBOARD</button>
-        <button id="btn-share" class="btn">SHARE SCORE</button>
-      </div>
-    </div>
 
-    <!-- ===================== HOW TO PLAY ===================== -->
-    <div id="screen-howto" class="screen overlay hidden">
-      <div class="panel">
         <h2>HOW TO PLAY</h2>
+
         <ul class="howto-list">
-          <li>Swipe left / right (or A / D, arrow keys) to change lanes</li>
-          <li>Swipe up / tap / Space to jump over potholes</li>
-          <li>Collect fuel canisters (+50) and bonus stars (+100)</li>
-          <li>Grab SHIELD, MAGNET and BOOST power-ups</li>
-          <li>Avoid traffic and obstacles — you have 3 lives</li>
-          <li>Chain pickups without crashing to build your combo</li>
+
+          <li>
+            Swipe left or right to change your position.
+          </li>
+
+          <li>
+            Avoid traffic, obstacles, barriers, and potholes.
+          </li>
+
+          <li>
+            Collect FUEL for +50 points.
+          </li>
+
+          <li>
+            Collect BONUS for +100 points.
+          </li>
+
+          <li>
+            Use SHIELD to protect yourself from a crash.
+          </li>
+
+          <li>
+            Use MAGNET to attract nearby collectibles.
+          </li>
+
+          <li>
+            Use BOOST to increase speed and scoring.
+          </li>
+
+          <li>
+            Survive as long as possible and build your combo.
+          </li>
+
+          <li>
+            Keyboard: A/D or Left/Right arrows.
+          </li>
+
+          <li>
+            Press P or Escape to pause.
+          </li>
+
         </ul>
-        <button id="btn-howto-close" class="btn btn-primary">GOT IT</button>
-      </div>
-    </div>
 
-    <!-- ===================== LEADERBOARD ===================== -->
-    <div id="screen-leaderboard" class="screen overlay hidden">
+        <button
+          id="btn-howto-back"
+          class="btn btn-primary"
+          type="button"
+        >
+          BACK
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         LEADERBOARD SCREEN
+    ====================================================== -->
+
+    <section
+      id="screen-leaderboard"
+      class="screen overlay hidden"
+      aria-label="Local leaderboard"
+    >
+
       <div class="panel">
+
+        <div class="panel-kicker">
+          DAVONIUM RECORDS
+        </div>
+
         <h2>LOCAL LEADERBOARD</h2>
-        <ol id="leaderboard-list" class="leaderboard-list"></ol>
-        <button id="btn-leaderboard-close" class="btn btn-primary">CLOSE</button>
-      </div>
-    </div>
 
-    <!-- ===================== SETTINGS ===================== -->
-    <div id="screen-settings" class="screen overlay hidden">
+        <p class="panel-description">
+          Your best local scores on this device.
+        </p>
+
+        <ol
+          id="leaderboard-list"
+          class="leaderboard-list"
+        >
+          <li class="leaderboard-empty">
+            No scores recorded yet.
+          </li>
+        </ol>
+
+        <button
+          id="btn-leaderboard-back"
+          class="btn btn-primary"
+          type="button"
+        >
+          BACK
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SETTINGS SCREEN
+    ====================================================== -->
+
+    <section
+      id="screen-settings"
+      class="screen overlay hidden"
+      aria-label="Game settings"
+    >
+
       <div class="panel">
+
+        <div class="panel-kicker">
+          SYSTEM CONFIGURATION
+        </div>
+
         <h2>SETTINGS</h2>
+
         <div class="setting-row">
+
           <span>SOUND</span>
-          <button id="toggle-sound" class="toggle" data-on="true"><span class="toggle-knob"></span></button>
+
+          <button
+            id="setting-sound"
+            class="toggle"
+            type="button"
+            role="switch"
+            aria-checked="true"
+            data-setting="sound"
+            data-on="true"
+          >
+            <span class="toggle-knob"></span>
+          </button>
+
         </div>
+
         <div class="setting-row">
+
           <span>REDUCED MOTION</span>
-          <button id="toggle-motion" class="toggle" data-on="false"><span class="toggle-knob"></span></button>
+
+          <button
+            id="setting-reduced-motion"
+            class="toggle"
+            type="button"
+            role="switch"
+            aria-checked="false"
+            data-setting="reduced-motion"
+            data-on="false"
+          >
+            <span class="toggle-knob"></span>
+          </button>
+
         </div>
-        <button id="btn-reset-scores" class="btn btn-danger">RESET HIGH SCORES</button>
-        <button id="btn-settings-close" class="btn btn-primary">CLOSE</button>
-      </div>
-    </div>
 
-    <!-- ===================== CONFIRM DIALOG ===================== -->
-    <div id="screen-confirm" class="screen overlay hidden">
+        <button
+          id="btn-reset-scores"
+          class="btn btn-danger"
+          type="button"
+        >
+          RESET HIGH SCORES
+        </button>
+
+        <button
+          id="btn-settings-back"
+          class="btn btn-primary"
+          type="button"
+        >
+          BACK
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         RESET CONFIRMATION SCREEN
+    ====================================================== -->
+
+    <section
+      id="screen-confirm"
+      class="screen overlay hidden"
+      aria-label="Confirm reset"
+    >
+
       <div class="panel">
-        <h2>ARE YOU SURE?</h2>
-        <p id="confirm-text">This will permanently delete your scores.</p>
-        <button id="btn-confirm-yes" class="btn btn-danger">YES, DELETE</button>
-        <button id="btn-confirm-no" class="btn">CANCEL</button>
-      </div>
-    </div>
 
-    <!-- ===================== SHARE FALLBACK ===================== -->
-    <div id="screen-share" class="screen overlay hidden">
+        <div class="panel-kicker">
+          WARNING
+        </div>
+
+        <h2>RESET SCORES?</h2>
+
+        <p class="panel-description">
+          This will remove your saved local high scores and leaderboard records.
+        </p>
+
+        <button
+          id="btn-confirm-reset"
+          class="btn btn-danger"
+          type="button"
+        >
+          YES, RESET
+        </button>
+
+        <button
+          id="btn-cancel-reset"
+          class="btn"
+          type="button"
+        >
+          CANCEL
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         GAME OVER SCREEN
+    ====================================================== -->
+
+    <section
+      id="screen-gameover"
+      class="screen overlay hidden"
+      aria-label="Game over"
+    >
+
       <div class="panel">
-        <h2>SHARE YOUR SCORE</h2>
-        <textarea id="share-text" class="share-textarea" readonly></textarea>
-        <div id="share-status" class="share-status"></div>
-        <button id="btn-share-copy" class="btn btn-primary">COPY TO CLIPBOARD</button>
-        <button id="btn-share-close" class="btn">CLOSE</button>
+
+        <div class="panel-kicker">
+          RUN COMPLETE
+        </div>
+
+        <h2>GAME OVER</h2>
+
+        <div
+          id="gameover-newbest"
+          class="newbest hidden"
+        >
+          NEW BEST SCORE
+        </div>
+
+        <div class="stat-row">
+          <span>FINAL SCORE</span>
+          <strong id="gameover-score">0</strong>
+        </div>
+
+        <div class="stat-row">
+          <span>BEST SCORE</span>
+          <strong id="gameover-best">0</strong>
+        </div>
+
+        <div class="stat-row">
+          <span>SURVIVAL TIME</span>
+          <strong id="gameover-time">0s</strong>
+        </div>
+
+        <div class="stat-row">
+          <span>BEST COMBO</span>
+          <strong id="gameover-combo">X1</strong>
+        </div>
+
+        <div class="name-row">
+
+          <label for="player-name">
+            DRIVER NAME
+          </label>
+
+          <input
+            id="player-name"
+            class="name-input"
+            type="text"
+            maxlength="12"
+            minlength="1"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="PLAYER"
+            value="PLAYER"
+          />
+
+        </div>
+
+        <button
+          id="btn-save-score"
+          class="btn"
+          type="button"
+        >
+          SAVE LOCAL SCORE
+        </button>
+
+        <button
+          id="btn-play-again"
+          class="btn btn-primary"
+          type="button"
+        >
+          PLAY AGAIN
+        </button>
+
+        <button
+          id="btn-gameover-leaderboard"
+          class="btn"
+          type="button"
+        >
+          LEADERBOARD
+        </button>
+
+        <button
+          id="btn-share-score"
+          class="btn"
+          type="button"
+        >
+          SHARE SCORE
+        </button>
+
+        <button
+          id="btn-gameover-menu"
+          class="btn"
+          type="button"
+        >
+          MAIN MENU
+        </button>
+
       </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SHARE SCREEN
+    ====================================================== -->
+
+    <section
+      id="screen-share"
+      class="screen overlay hidden"
+      aria-label="Share score"
+    >
+
+      <div class="panel">
+
+        <div class="panel-kicker">
+          DAVONIUM CHALLENGE
+        </div>
+
+        <h2>SHARE SCORE</h2>
+
+        <p class="panel-description">
+          Share your ABUJA ROADFIRE result.
+        </p>
+
+        <textarea
+          id="share-text"
+          class="share-textarea"
+          readonly
+          aria-label="Share message"
+        ></textarea>
+
+        <div
+          id="share-status"
+          class="share-status"
+          aria-live="polite"
+        ></div>
+
+        <button
+          id="btn-native-share"
+          class="btn btn-primary"
+          type="button"
+        >
+          SHARE
+        </button>
+
+        <button
+          id="btn-copy-share"
+          class="btn"
+          type="button"
+        >
+          COPY TEXT
+        </button>
+
+        <button
+          id="btn-share-back"
+          class="btn"
+          type="button"
+        >
+          BACK
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         TEMPORARY EVENT NOTIFICATION
+    ====================================================== -->
+
+    <div
+      id="event-toast"
+      class="event-toast hidden"
+      role="status"
+      aria-live="polite"
+    >
+      <span id="event-toast-icon">✦</span>
+      <span id="event-toast-text">READY</span>
     </div>
 
-  </div>
 
-  <script src="script.js"></script>
+    <!-- =====================================================
+         POWER-UP NOTIFICATION
+    ====================================================== -->
+
+    <div
+      id="powerup-notification"
+      class="powerup-notification hidden"
+      aria-live="polite"
+    >
+      <span id="powerup-notification-name">BOOST</span>
+      <span id="powerup-notification-description">
+        SPEED INCREASED
+      </span>
+    </div>
+
+
+    <!-- =====================================================
+         CRASH / IMPACT FLASH
+    ====================================================== -->
+
+    <div
+      id="impact-flash"
+      class="impact-flash"
+      aria-hidden="true"
+    ></div>
+
+
+    <!-- =====================================================
+         SCREEN VIGNETTE
+    ====================================================== -->
+
+    <div
+      id="screen-vignette"
+      class="screen-vignette"
+      aria-hidden="true"
+    ></div>
+
+
+    <!-- =====================================================
+         DAVONIUM AD PLACEHOLDER
+         No real advertising SDK is included.
+    ====================================================== -->
+
+    <div
+      id="davonium-ad-slot"
+      class="davonium-ad-slot hidden"
+      aria-hidden="true"
+    >
+      <!-- Future AdMob / AdSense integration can be added here. -->
+    </div>
+
+  </main>
+
+
+  <!-- =======================================================
+       JAVASCRIPT APPLICATION
+       The complete game engine will be supplied in script.js.
+  ======================================================== -->
+
+  <script src="script.js" defer></script>
+
 </body>
 </html>
