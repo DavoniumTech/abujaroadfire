@@ -574,15 +574,23 @@ function showScreen(screenState) {
 
 function updateHudVisibility() {
   const hud = $("#hud");
+  const controls = $("#touch-controls");
 
-  if (!hud) return;
+  if (hud) {
+    const visible =
+      game.state === STATES.PLAYING ||
+      game.state === STATES.READY ||
+      game.state === STATES.PAUSED;
 
-  const visible =
-    game.state === STATES.PLAYING ||
-    game.state === STATES.READY ||
-    game.state === STATES.PAUSED;
+    hud.classList.toggle("hidden", !visible);
+  }
 
-  hud.classList.toggle("hidden", !visible);
+  if (controls) {
+    controls.classList.toggle(
+      "hidden",
+      game.state !== STATES.PLAYING
+    );
+  }
 }
 
 function openMenu() {
@@ -1846,6 +1854,16 @@ function drawPlayerShadow(scale) {
   ctx.restore();
 }
 
+/* Shared bike/rider attachment points (in "scale" units) so the
+   rider's hands and feet always line up with the bike's handlebar
+   grip and footpeg, however either shape changes in the future. */
+const BIKE_GRIP_X = 24;
+const BIKE_GRIP_Y = -23;
+const BIKE_PEG_X = -9;
+const BIKE_PEG_Y = 6;
+const BIKE_SEAT_X = -9;
+const BIKE_SEAT_Y = -9;
+
 function drawBike(scale) {
   const t = PLAYER.animationTime;
   const wheelRotation = t * 9;
@@ -1886,12 +1904,32 @@ function drawBike(scale) {
   ctx.stroke();
 
   ctx.strokeStyle = "#d2dbe2";
-  ctx.lineWidth = 2 * scale;
+  ctx.lineWidth = 2.6 * scale;
 
   ctx.beginPath();
-  ctx.moveTo(frontWheelX, wheelY);
-  ctx.lineTo(28 * scale, -9 * scale);
+  ctx.moveTo(frontWheelX - 2 * scale, wheelY - 3 * scale);
+  ctx.lineTo(17 * scale, -10 * scale);
   ctx.stroke();
+
+  ctx.strokeStyle = "#2b333c";
+  ctx.lineWidth = 3 * scale;
+  ctx.lineCap = "round";
+
+  ctx.beginPath();
+  ctx.moveTo(17 * scale, -10 * scale);
+  ctx.lineTo(BIKE_GRIP_X * scale, BIKE_GRIP_Y * scale);
+  ctx.stroke();
+
+  ctx.fillStyle = "#3a4553";
+  ctx.beginPath();
+  ctx.arc(
+    BIKE_PEG_X * scale,
+    BIKE_PEG_Y * scale,
+    2.4 * scale,
+    0,
+    Math.PI * 2
+  );
+  ctx.fill();
 
   ctx.restore();
 
@@ -2059,208 +2097,170 @@ function drawExhaustSmoke(scale) {
 
 function drawRider(scale) {
   const t = PLAYER.animationTime;
-  const runningMotion = Math.sin(t * 7);
-  const ridingMotion = Math.sin(t * 5);
+  const breathe = Math.sin(t * 3) * 0.4 * scale;
 
-  const shoulderY = -39 * scale;
-  const headY = -61 * scale;
+  /* Seated riding posture: hips on the seat, knees bent forward
+     with feet on the footpeg, torso leaning forward over the tank,
+     arms reaching down to the handlebar grip, head tucked forward. */
+  const hipX = BIKE_SEAT_X * scale;
+  const hipY = BIKE_SEAT_Y * scale;
 
-  const armSwing = runningMotion * 1.5 * scale;
-  const legSwing = ridingMotion * 2.5 * scale;
+  const kneeX = -2 * scale;
+  const kneeY = -4 * scale;
+
+  const footX = BIKE_PEG_X * scale;
+  const footY = BIKE_PEG_Y * scale;
+
+  const shoulderX = 6 * scale;
+  const shoulderY = -30 * scale + breathe;
+
+  const elbowX = 15 * scale;
+  const elbowY = -22 * scale;
+
+  const handX = BIKE_GRIP_X * scale;
+  const handY = BIKE_GRIP_Y * scale;
+
+  const headX = 12 * scale;
+  const headY = -42 * scale + breathe;
 
   ctx.save();
 
-  /* Legs */
-  ctx.strokeStyle = "#101a2a";
-  ctx.lineWidth = 8 * scale;
+  /* Far leg (thigh forward along the tank, shin back down to the peg) */
+  ctx.strokeStyle = "#0c1420";
+  ctx.lineWidth = 7 * scale;
   ctx.lineCap = "round";
 
   ctx.beginPath();
-  ctx.moveTo(-7 * scale, -5 * scale);
-  ctx.lineTo(
-    -13 * scale + legSwing,
-    10 * scale
-  );
-  ctx.lineTo(-21 * scale, 19 * scale);
+  ctx.moveTo(hipX - 1 * scale, hipY + 2 * scale);
+  ctx.lineTo(kneeX - 2 * scale, kneeY + 2 * scale);
+  ctx.lineTo(footX - 2 * scale, footY);
   ctx.stroke();
 
-  ctx.beginPath();
-  ctx.moveTo(5 * scale, -5 * scale);
-  ctx.lineTo(
-    11 * scale - legSwing,
-    9 * scale
-  );
-  ctx.lineTo(20 * scale, 18 * scale);
-  ctx.stroke();
-
-  /* Shoes */
-  ctx.fillStyle = "#070a10";
-
-  ctx.beginPath();
-  ctx.ellipse(
-    -22 * scale,
-    20 * scale,
-    8 * scale,
-    3 * scale,
-    -0.15,
-    0,
-    Math.PI * 2
-  );
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.ellipse(
-    21 * scale,
-    19 * scale,
-    8 * scale,
-    3 * scale,
-    0.15,
-    0,
-    Math.PI * 2
-  );
-  ctx.fill();
-
-  /* Torso */
+  /* Torso, leaning forward from hip to shoulder */
   const torsoGradient = ctx.createLinearGradient(
-    -13 * scale,
-    -39 * scale,
-    13 * scale,
-    -8 * scale
+    hipX,
+    hipY,
+    shoulderX,
+    shoulderY
   );
 
-  torsoGradient.addColorStop(0, "#354d68");
-  torsoGradient.addColorStop(1, "#152538");
+  torsoGradient.addColorStop(0, "#152538");
+  torsoGradient.addColorStop(1, "#3a5674");
 
   ctx.fillStyle = torsoGradient;
 
   ctx.beginPath();
-  ctx.moveTo(-13 * scale, -41 * scale);
-  ctx.lineTo(12 * scale, -41 * scale);
-  ctx.lineTo(15 * scale, -12 * scale);
-  ctx.lineTo(-10 * scale, -10 * scale);
+  ctx.moveTo(hipX - 5 * scale, hipY + 1 * scale);
+  ctx.lineTo(shoulderX - 7 * scale, shoulderY);
+  ctx.lineTo(shoulderX + 7 * scale, shoulderY + 3 * scale);
+  ctx.lineTo(hipX + 7 * scale, hipY + 4 * scale);
   ctx.closePath();
   ctx.fill();
 
   /* Jacket stripe */
   ctx.strokeStyle = "#ff4f36";
-  ctx.lineWidth = 3 * scale;
+  ctx.lineWidth = 2.4 * scale;
 
   ctx.beginPath();
-  ctx.moveTo(-8 * scale, -38 * scale);
-  ctx.lineTo(-5 * scale, -13 * scale);
+  ctx.moveTo(hipX + 1 * scale, hipY);
+  ctx.lineTo(shoulderX + 1 * scale, shoulderY + 4 * scale);
   ctx.stroke();
 
-  /* Neck */
-  ctx.fillStyle = "#a96d52";
-  ctx.fillRect(
-    -5 * scale,
-    -48 * scale,
-    10 * scale,
-    9 * scale
-  );
-
-  /* Arms */
-  ctx.strokeStyle = "#233a51";
-  ctx.lineWidth = 7 * scale;
+  /* Near leg */
+  ctx.strokeStyle = "#182335";
+  ctx.lineWidth = 8 * scale;
   ctx.lineCap = "round";
 
   ctx.beginPath();
-  ctx.moveTo(-10 * scale, -37 * scale);
-  ctx.lineTo(
-    -19 * scale + armSwing,
-    -23 * scale
-  );
-  ctx.lineTo(-12 * scale, -15 * scale);
+  ctx.moveTo(hipX + 2 * scale, hipY + 3 * scale);
+  ctx.lineTo(kneeX + 2 * scale, kneeY + 3 * scale);
+  ctx.lineTo(footX + 2 * scale, footY);
   ctx.stroke();
 
+  /* Boot on the peg */
+  ctx.fillStyle = "#070a10";
+
   ctx.beginPath();
-  ctx.moveTo(10 * scale, -37 * scale);
-  ctx.lineTo(
-    19 * scale - armSwing,
-    -23 * scale
+  ctx.ellipse(
+    footX + 3 * scale,
+    footY + 1 * scale,
+    7 * scale,
+    3 * scale,
+    -0.2,
+    0,
+    Math.PI * 2
   );
-  ctx.lineTo(14 * scale, -13 * scale);
+  ctx.fill();
+
+  /* Neck */
+  ctx.fillStyle = "#a96d52";
+  ctx.save();
+  ctx.translate(shoulderX + 1 * scale, shoulderY - 2 * scale);
+  ctx.rotate(0.3);
+  ctx.fillRect(-3 * scale, -4 * scale, 8 * scale, 8 * scale);
+  ctx.restore();
+
+  /* Far arm reaching down to the grip */
+  ctx.strokeStyle = "#1c2e42";
+  ctx.lineWidth = 6 * scale;
+  ctx.lineCap = "round";
+
+  ctx.beginPath();
+  ctx.moveTo(shoulderX - 2 * scale, shoulderY + 2 * scale);
+  ctx.lineTo(elbowX - 2 * scale, elbowY + 2 * scale);
+  ctx.lineTo(handX - 2 * scale, handY + 2 * scale);
+  ctx.stroke();
+
+  /* Helmet, tilted forward into the wind */
+  ctx.save();
+  ctx.translate(headX, headY);
+  ctx.rotate(0.28);
+
+  ctx.fillStyle = "#111a27";
+  ctx.beginPath();
+  ctx.arc(0, 3 * scale, 13 * scale, Math.PI, Math.PI * 2);
+  ctx.lineTo(13 * scale, 8 * scale);
+  ctx.lineTo(-13 * scale, 8 * scale);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = "#8fc5d5";
+  ctx.beginPath();
+  ctx.roundRect(-9 * scale, 1 * scale, 19 * scale, 6.5 * scale, 3 * scale);
+  ctx.fill();
+
+  ctx.fillStyle = "rgba(9,23,36,0.75)";
+  ctx.fillRect(-7 * scale, 2 * scale, 15 * scale, 3.6 * scale);
+
+  ctx.strokeStyle = "#ff6d4f";
+  ctx.lineWidth = 2 * scale;
+  ctx.beginPath();
+  ctx.arc(0, 2 * scale, 9.5 * scale, Math.PI * 1.1, Math.PI * 1.75);
+  ctx.stroke();
+
+  ctx.restore();
+
+  /* Near arm, drawn last so it sits over the torso and helmet strap */
+  ctx.strokeStyle = "#233a51";
+  ctx.lineWidth = 6.5 * scale;
+  ctx.lineCap = "round";
+
+  ctx.beginPath();
+  ctx.moveTo(shoulderX + 2 * scale, shoulderY + 1 * scale);
+  ctx.lineTo(elbowX, elbowY);
+  ctx.lineTo(handX, handY);
   ctx.stroke();
 
   /* Gloves */
   ctx.fillStyle = "#080d16";
 
   ctx.beginPath();
-  ctx.arc(
-    -12 * scale,
-    -14 * scale,
-    4 * scale,
-    0,
-    Math.PI * 2
-  );
+  ctx.arc(handX - 2 * scale, handY + 2 * scale, 3.4 * scale, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.beginPath();
-  ctx.arc(
-    14 * scale,
-    -13 * scale,
-    4 * scale,
-    0,
-    Math.PI * 2
-  );
+  ctx.arc(handX, handY, 3.8 * scale, 0, Math.PI * 2);
   ctx.fill();
-
-  /* Helmet */
-  ctx.fillStyle = "#111a27";
-
-  ctx.beginPath();
-  ctx.arc(
-    0,
-    headY + 3 * scale,
-    14 * scale,
-    Math.PI,
-    Math.PI * 2
-  );
-  ctx.lineTo(
-    14 * scale,
-    headY + 8 * scale
-  );
-  ctx.lineTo(
-    -14 * scale,
-    headY + 8 * scale
-  );
-  ctx.closePath();
-  ctx.fill();
-
-  /* Helmet visor */
-  ctx.fillStyle = "#8fc5d5";
-
-  ctx.beginPath();
-  ctx.roundRect(
-    -10 * scale,
-    headY + 1 * scale,
-    20 * scale,
-    7 * scale,
-    3 * scale
-  );
-  ctx.fill();
-
-  ctx.fillStyle = "rgba(9,23,36,0.75)";
-  ctx.fillRect(
-    -8 * scale,
-    headY + 2 * scale,
-    16 * scale,
-    4 * scale
-  );
-
-  /* Helmet highlight */
-  ctx.strokeStyle = "#ff6d4f";
-  ctx.lineWidth = 2 * scale;
-
-  ctx.beginPath();
-  ctx.arc(
-    0,
-    headY + 2 * scale,
-    10 * scale,
-    Math.PI * 1.1,
-    Math.PI * 1.75
-  );
-  ctx.stroke();
 
   ctx.restore();
 }
@@ -3831,6 +3831,22 @@ function bindButton(selector, handler) {
   });
 }
 
+function bindControlButton(selector, handler) {
+  const element = $(selector);
+
+  if (!element) return;
+
+  element.addEventListener(
+    "pointerdown",
+    (event) => {
+      event.preventDefault();
+      resumeAudio();
+      handler(event);
+    },
+    { passive: false }
+  );
+}
+
 function bindUI() {
   bindButton("#btn-play", startGame);
   bindButton("#btn-howto", openHowToPlay);
@@ -3927,6 +3943,10 @@ function bindInputEvents() {
       { passive: true }
     );
   }
+
+  bindControlButton("#btn-move-left", () => movePlayer(-1));
+  bindControlButton("#btn-move-right", () => movePlayer(1));
+  bindControlButton("#btn-jump", jumpPlayer);
 
   window.addEventListener(
     "resize",
