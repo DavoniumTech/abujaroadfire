@@ -360,7 +360,7 @@ function saveLeaderboardEntry(name, score) {
   const leaderboard = getLeaderboard();
 
   leaderboard.push({
-    name: String(name || "RIDER").slice(0, 18),
+    name: String(name || "DRIVER").slice(0, 18),
     score: Math.floor(score),
     date: nowDate()
   });
@@ -1774,7 +1774,7 @@ function drawVehicleWheels(width, height, scale) {
 }
 
 /* =========================================================
-   16. PLAYER MOTORCYCLE
+   16. PLAYER VEHICLE
    ========================================================= */
 
 function drawPlayer() {
@@ -1789,7 +1789,7 @@ function drawPlayer() {
   const baseY = game.height * PLAYER.y;
   const jumpOffset = -PLAYER.jumpHeight * game.height;
 
-  const bikeScale = clamp(
+  const carScale = clamp(
     Math.min(game.width, game.height) / 650,
     0.65,
     1.35
@@ -1809,12 +1809,11 @@ function drawPlayer() {
       0.55 + Math.sin(game.time * 0.025) * 0.25;
   }
 
-  drawPlayerShadow(bikeScale);
-  drawBike(bikeScale);
-  drawRider(bikeScale);
+  drawPlayerShadow(carScale);
+  drawPlayerCar(carScale);
 
   if (PLAYER.shieldTime > 0) {
-    drawPlayerShield(bikeScale);
+    drawPlayerShield(carScale);
   }
 
   ctx.restore();
@@ -1832,7 +1831,7 @@ function drawPlayerShadow(scale) {
     2,
     0,
     0,
-    45 * scale
+    50 * scale
   );
 
   shadow.addColorStop(0, "rgba(0,0,0,0.55)");
@@ -1842,9 +1841,9 @@ function drawPlayerShadow(scale) {
   ctx.beginPath();
   ctx.ellipse(
     0,
-    0,
-    43 * scale,
-    20 * scale,
+    4 * scale,
+    48 * scale,
+    22 * scale,
     0,
     0,
     Math.PI * 2
@@ -1854,416 +1853,264 @@ function drawPlayerShadow(scale) {
   ctx.restore();
 }
 
-/* Shared bike/rider attachment points (in "scale" units) so the
-   rider's hands and feet always line up with the bike's handlebar
-   grip and footpeg, however either shape changes in the future. */
-const BIKE_GRIP_X = 24;
-const BIKE_GRIP_Y = -23;
-const BIKE_PEG_X = -9;
-const BIKE_PEG_Y = 6;
-const BIKE_SEAT_X = -9;
-const BIKE_SEAT_Y = -9;
+/* =========================================================
+   16. PLAYER VEHICLE — ROLLS-ROYCE
+   Rendered as a chase-cam rear three-quarter view: the trunk
+   and taillights are nearest the camera (positive local y),
+   the roof and windscreen recede away from camera (negative
+   local y), matching the rear three-quarter chase-cam angle.
+   ========================================================= */
 
-function drawBike(scale) {
+function drawPlayerCar(scale) {
   const t = PLAYER.animationTime;
-  const wheelRotation = t * 9;
-
-  const wheelRadius = 17 * scale;
-  const wheelWidth = 7 * scale;
-
-  const rearWheelX = -19 * scale;
-  const frontWheelX = 22 * scale;
-  const wheelY = 18 * scale;
-
-  drawBikeWheel(
-    rearWheelX,
-    wheelY,
-    wheelRadius,
-    wheelWidth,
-    wheelRotation
-  );
-
-  drawBikeWheel(
-    frontWheelX,
-    wheelY,
-    wheelRadius,
-    wheelWidth,
-    wheelRotation
-  );
+  const idleBob = Math.sin(t * 3) * 0.35 * scale;
 
   ctx.save();
+  ctx.translate(0, idleBob);
 
-  ctx.strokeStyle = "#7d8a98";
-  ctx.lineWidth = 3 * scale;
-  ctx.lineCap = "round";
+  drawCarWheel(-32 * scale, 16 * scale, 10 * scale, t);
+  drawCarWheel(32 * scale, 16 * scale, 10 * scale, t);
 
-  ctx.beginPath();
-  ctx.moveTo(rearWheelX, wheelY);
-  ctx.lineTo(-5 * scale, -3 * scale);
-  ctx.lineTo(frontWheelX, wheelY);
-  ctx.stroke();
-
-  ctx.strokeStyle = "#d2dbe2";
-  ctx.lineWidth = 2.6 * scale;
-
-  ctx.beginPath();
-  ctx.moveTo(frontWheelX - 2 * scale, wheelY - 3 * scale);
-  ctx.lineTo(17 * scale, -10 * scale);
-  ctx.stroke();
-
-  ctx.strokeStyle = "#2b333c";
-  ctx.lineWidth = 3 * scale;
-  ctx.lineCap = "round";
-
-  ctx.beginPath();
-  ctx.moveTo(17 * scale, -10 * scale);
-  ctx.lineTo(BIKE_GRIP_X * scale, BIKE_GRIP_Y * scale);
-  ctx.stroke();
-
-  ctx.fillStyle = "#3a4553";
-  ctx.beginPath();
-  ctx.arc(
-    BIKE_PEG_X * scale,
-    BIKE_PEG_Y * scale,
-    2.4 * scale,
-    0,
-    Math.PI * 2
-  );
-  ctx.fill();
-
-  ctx.restore();
-
+  /* Body shell: wide rear bumper narrowing up toward the roof */
   const bodyGradient = ctx.createLinearGradient(
-    -20 * scale,
-    -10 * scale,
-    18 * scale,
-    15 * scale
+    0,
+    24 * scale,
+    0,
+    -46 * scale
   );
 
-  bodyGradient.addColorStop(0, "#ff8a55");
-  bodyGradient.addColorStop(0.4, "#ed3f2f");
-  bodyGradient.addColorStop(1, "#7e1720");
+  bodyGradient.addColorStop(0, "#050810");
+  bodyGradient.addColorStop(0.35, "#132447");
+  bodyGradient.addColorStop(0.6, "#1d3a68");
+  bodyGradient.addColorStop(1, "#0a1424");
 
   ctx.fillStyle = bodyGradient;
 
   ctx.beginPath();
-  ctx.moveTo(-25 * scale, 5 * scale);
-  ctx.lineTo(-12 * scale, -9 * scale);
-  ctx.lineTo(10 * scale, -11 * scale);
-  ctx.lineTo(24 * scale, 3 * scale);
-  ctx.lineTo(13 * scale, 12 * scale);
-  ctx.lineTo(-17 * scale, 12 * scale);
+  ctx.moveTo(-34 * scale, 24 * scale);
+  ctx.quadraticCurveTo(
+    -36 * scale, 6 * scale,
+    -27 * scale, -10 * scale
+  );
+  ctx.quadraticCurveTo(
+    -24 * scale, -18 * scale,
+    -16 * scale, -22 * scale
+  );
+  ctx.lineTo(16 * scale, -22 * scale);
+  ctx.quadraticCurveTo(
+    24 * scale, -18 * scale,
+    27 * scale, -10 * scale
+  );
+  ctx.quadraticCurveTo(
+    36 * scale, 6 * scale,
+    34 * scale, 24 * scale
+  );
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = "#101a25";
-
+  /* Rear fenders (slight flare over the wheels) */
+  ctx.fillStyle = "#0c1830";
   ctx.beginPath();
-  ctx.moveTo(-7 * scale, -9 * scale);
-  ctx.lineTo(10 * scale, -8 * scale);
-  ctx.lineTo(16 * scale, -1 * scale);
-  ctx.lineTo(-2 * scale, 0);
-  ctx.closePath();
+  ctx.ellipse(-32 * scale, 17 * scale, 9 * scale, 11 * scale, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(32 * scale, 17 * scale, 9 * scale, 11 * scale, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = "#ffdfaa";
+  /* Chrome beltline trim separating body from greenhouse */
+  ctx.strokeStyle = "#d7dde4";
+  ctx.lineWidth = 1.4 * scale;
   ctx.beginPath();
-  ctx.ellipse(
-    24 * scale,
-    0,
-    3 * scale,
-    4 * scale,
-    0,
-    0,
-    Math.PI * 2
-  );
-  ctx.fill();
-
-  ctx.fillStyle = "#f8f3d1";
-  ctx.beginPath();
-  ctx.ellipse(
-    26 * scale,
-    -3 * scale,
-    2 * scale,
-    2 * scale,
-    0,
-    0,
-    Math.PI * 2
-  );
-  ctx.fill();
-
-  ctx.fillStyle = "#111820";
-  ctx.fillRect(
-    -23 * scale,
-    10 * scale,
-    9 * scale,
-    4 * scale
-  );
-
-  ctx.fillStyle = "#e9e2cd";
-  ctx.fillRect(
-    -28 * scale,
-    6 * scale,
-    4 * scale,
-    4 * scale
-  );
-
-  drawExhaustSmoke(scale);
-}
-
-function drawBikeWheel(
-  x,
-  y,
-  radius,
-  width,
-  rotation
-) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(rotation);
-
-  ctx.fillStyle = "#070a0f";
-  ctx.beginPath();
-  ctx.ellipse(
-    0,
-    0,
-    width,
-    radius,
-    0,
-    0,
-    Math.PI * 2
-  );
-  ctx.fill();
-
-  ctx.strokeStyle = "#8b9ba9";
-  ctx.lineWidth = 1.5;
-
-  ctx.beginPath();
-  ctx.ellipse(
-    0,
-    0,
-    width * 0.45,
-    radius * 0.86,
-    0,
-    0,
-    Math.PI * 2
-  );
+  ctx.moveTo(-27 * scale, -9 * scale);
+  ctx.lineTo(27 * scale, -9 * scale);
   ctx.stroke();
 
-  ctx.strokeStyle = "#4c5c6d";
+  /* Roof / rear windscreen (tinted glass, narrower than the body) */
+  const glassGradient = ctx.createLinearGradient(
+    0, -10 * scale,
+    0, -44 * scale
+  );
+  glassGradient.addColorStop(0, "#12202f");
+  glassGradient.addColorStop(0.55, "#2c4c63");
+  glassGradient.addColorStop(1, "#7fb3c9");
+
+  ctx.fillStyle = glassGradient;
+  ctx.beginPath();
+  ctx.moveTo(-16 * scale, -10 * scale);
+  ctx.quadraticCurveTo(-18 * scale, -30 * scale, -12 * scale, -40 * scale);
+  ctx.lineTo(12 * scale, -40 * scale);
+  ctx.quadraticCurveTo(18 * scale, -30 * scale, 16 * scale, -10 * scale);
+  ctx.closePath();
+  ctx.fill();
+
+  /* Roof panel above the glass */
+  ctx.fillStyle = "#0e1c33";
+  ctx.beginPath();
+  ctx.moveTo(-12 * scale, -40 * scale);
+  ctx.quadraticCurveTo(0, -47 * scale, 12 * scale, -40 * scale);
+  ctx.quadraticCurveTo(6 * scale, -44 * scale, -6 * scale, -44 * scale);
+  ctx.closePath();
+  ctx.fill();
+
+  /* C-pillars framing the rear windscreen */
+  ctx.strokeStyle = "#0a1424";
+  ctx.lineWidth = 3 * scale;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-16 * scale, -10 * scale);
+  ctx.lineTo(-12 * scale, -40 * scale);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(16 * scale, -10 * scale);
+  ctx.lineTo(12 * scale, -40 * scale);
+  ctx.stroke();
+
+  /* Glass reflection streak */
+  ctx.strokeStyle = "rgba(255,255,255,0.35)";
+  ctx.lineWidth = 1.6 * scale;
+  ctx.beginPath();
+  ctx.moveTo(-9 * scale, -33 * scale);
+  ctx.lineTo(-3 * scale, -13 * scale);
+  ctx.stroke();
+
+  /* Side mirrors */
+  ctx.fillStyle = "#0e1c33";
+  ctx.beginPath();
+  ctx.ellipse(-30 * scale, -14 * scale, 3.4 * scale, 2.1 * scale, 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(30 * scale, -14 * scale, 3.4 * scale, 2.1 * scale, -0.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  /* Rear emblem (Rolls-Royce style monogram) */
+  ctx.fillStyle = "#e7c66b";
+  ctx.beginPath();
+  ctx.arc(0, 6 * scale, 3.2 * scale, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#0a1424";
+  ctx.font = `${5.5 * scale}px Georgia, serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("RR", 0, 6.2 * scale);
+
+  /* Taillight strip */
+  ctx.fillStyle = "#ff2f3f";
+  ctx.shadowColor = "#ff2f3f";
+  ctx.shadowBlur = 6 * scale;
+  ctx.beginPath();
+  ctx.roundRect(-30 * scale, 13 * scale, 18 * scale, 3.2 * scale, 1.6 * scale);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.roundRect(12 * scale, 13 * scale, 18 * scale, 3.2 * scale, 1.6 * scale);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  /* License plate */
+  ctx.fillStyle = "#e9ecf0";
+  ctx.fillRect(-7 * scale, 18 * scale, 14 * scale, 5 * scale);
+  ctx.strokeStyle = "#0a1424";
+  ctx.lineWidth = 0.6 * scale;
+  ctx.strokeRect(-7 * scale, 18 * scale, 14 * scale, 5 * scale);
+
+  /* Chrome rear bumper trim + exhaust tips */
+  ctx.strokeStyle = "#c7cdd6";
+  ctx.lineWidth = 2 * scale;
+  ctx.beginPath();
+  ctx.moveTo(-33 * scale, 23 * scale);
+  ctx.lineTo(33 * scale, 23 * scale);
+  ctx.stroke();
+
+  ctx.fillStyle = "#cfd6dd";
+  ctx.beginPath();
+  ctx.arc(-19 * scale, 24 * scale, 2.6 * scale, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(19 * scale, 24 * scale, 2.6 * scale, 0, Math.PI * 2);
+  ctx.fill();
+
+  /* Overall gloss highlight sweeping across the body */
+  const gloss = ctx.createLinearGradient(-30 * scale, -20 * scale, 20 * scale, 10 * scale);
+  gloss.addColorStop(0, "rgba(255,255,255,0.18)");
+  gloss.addColorStop(0.25, "rgba(255,255,255,0)");
+  gloss.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = gloss;
+  ctx.beginPath();
+  ctx.moveTo(-34 * scale, 24 * scale);
+  ctx.quadraticCurveTo(-36 * scale, 6 * scale, -27 * scale, -10 * scale);
+  ctx.quadraticCurveTo(-24 * scale, -18 * scale, -16 * scale, -22 * scale);
+  ctx.lineTo(16 * scale, -22 * scale);
+  ctx.quadraticCurveTo(24 * scale, -18 * scale, 27 * scale, -10 * scale);
+  ctx.quadraticCurveTo(36 * scale, 6 * scale, 34 * scale, 24 * scale);
+  ctx.closePath();
+  ctx.fill();
+
+  drawCarExhaustPuff(scale);
+
+  ctx.restore();
+}
+
+function drawCarWheel(x, y, radius, t) {
+  ctx.save();
+  ctx.translate(x, y);
+
+  ctx.fillStyle = "#05070a";
+  ctx.beginPath();
+  ctx.ellipse(0, 0, radius * 0.6, radius, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.save();
+  ctx.rotate(t * 9);
+
+  ctx.strokeStyle = "#c7cdd6";
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, radius * 0.36, radius * 0.62, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.strokeStyle = "#9aa4ae";
   ctx.lineWidth = 1;
-
-  for (let i = 0; i < 6; i += 1) {
-    const angle = (Math.PI * 2 * i) / 6;
-
+  for (let i = 0; i < 5; i += 1) {
+    const angle = (Math.PI * 2 * i) / 5;
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.lineTo(
-      Math.cos(angle) * width * 0.35,
-      Math.sin(angle) * radius * 0.75
+      Math.cos(angle) * radius * 0.3,
+      Math.sin(angle) * radius * 0.52
     );
     ctx.stroke();
   }
 
   ctx.restore();
+
+  ctx.fillStyle = "#e7c66b";
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 0.12, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
 }
 
-function drawExhaustSmoke(scale) {
+function drawCarExhaustPuff(scale) {
   if (game.reducedMotion) return;
-
   if (game.speed < 0.25) return;
 
   const amount = PLAYER.nitroTime > 0 ? 2 : 1;
 
   for (let i = 0; i < amount; i += 1) {
-    const x = -30 * scale - random(0, 8) * scale;
-    const y = 8 * scale + random(-3, 3) * scale;
+    const side = i % 2 === 0 ? -19 : 19;
+    const x = side * scale + random(-2, 2) * scale;
+    const y = 27 * scale + random(0, 4) * scale;
 
     ctx.save();
-    ctx.globalAlpha = random(0.12, 0.3);
+    ctx.globalAlpha = random(0.1, 0.26);
     ctx.fillStyle = "#b7c2ca";
     ctx.beginPath();
-    ctx.arc(
-      x,
-      y,
-      random(2, 6) * scale,
-      0,
-      Math.PI * 2
-    );
+    ctx.arc(x, y, random(2, 5) * scale, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
 }
 
-function drawRider(scale) {
-  const t = PLAYER.animationTime;
-  const breathe = Math.sin(t * 3) * 0.4 * scale;
-
-  /* Seated riding posture: hips on the seat, knees bent forward
-     with feet on the footpeg, torso leaning forward over the tank,
-     arms reaching down to the handlebar grip, head tucked forward. */
-  const hipX = BIKE_SEAT_X * scale;
-  const hipY = BIKE_SEAT_Y * scale;
-
-  const kneeX = -2 * scale;
-  const kneeY = -4 * scale;
-
-  const footX = BIKE_PEG_X * scale;
-  const footY = BIKE_PEG_Y * scale;
-
-  const shoulderX = 6 * scale;
-  const shoulderY = -30 * scale + breathe;
-
-  const elbowX = 15 * scale;
-  const elbowY = -22 * scale;
-
-  const handX = BIKE_GRIP_X * scale;
-  const handY = BIKE_GRIP_Y * scale;
-
-  const headX = 12 * scale;
-  const headY = -42 * scale + breathe;
-
-  ctx.save();
-
-  /* Far leg (thigh forward along the tank, shin back down to the peg) */
-  ctx.strokeStyle = "#0c1420";
-  ctx.lineWidth = 7 * scale;
-  ctx.lineCap = "round";
-
-  ctx.beginPath();
-  ctx.moveTo(hipX - 1 * scale, hipY + 2 * scale);
-  ctx.lineTo(kneeX - 2 * scale, kneeY + 2 * scale);
-  ctx.lineTo(footX - 2 * scale, footY);
-  ctx.stroke();
-
-  /* Torso, leaning forward from hip to shoulder */
-  const torsoGradient = ctx.createLinearGradient(
-    hipX,
-    hipY,
-    shoulderX,
-    shoulderY
-  );
-
-  torsoGradient.addColorStop(0, "#152538");
-  torsoGradient.addColorStop(1, "#3a5674");
-
-  ctx.fillStyle = torsoGradient;
-
-  ctx.beginPath();
-  ctx.moveTo(hipX - 5 * scale, hipY + 1 * scale);
-  ctx.lineTo(shoulderX - 7 * scale, shoulderY);
-  ctx.lineTo(shoulderX + 7 * scale, shoulderY + 3 * scale);
-  ctx.lineTo(hipX + 7 * scale, hipY + 4 * scale);
-  ctx.closePath();
-  ctx.fill();
-
-  /* Jacket stripe */
-  ctx.strokeStyle = "#ff4f36";
-  ctx.lineWidth = 2.4 * scale;
-
-  ctx.beginPath();
-  ctx.moveTo(hipX + 1 * scale, hipY);
-  ctx.lineTo(shoulderX + 1 * scale, shoulderY + 4 * scale);
-  ctx.stroke();
-
-  /* Near leg */
-  ctx.strokeStyle = "#182335";
-  ctx.lineWidth = 8 * scale;
-  ctx.lineCap = "round";
-
-  ctx.beginPath();
-  ctx.moveTo(hipX + 2 * scale, hipY + 3 * scale);
-  ctx.lineTo(kneeX + 2 * scale, kneeY + 3 * scale);
-  ctx.lineTo(footX + 2 * scale, footY);
-  ctx.stroke();
-
-  /* Boot on the peg */
-  ctx.fillStyle = "#070a10";
-
-  ctx.beginPath();
-  ctx.ellipse(
-    footX + 3 * scale,
-    footY + 1 * scale,
-    7 * scale,
-    3 * scale,
-    -0.2,
-    0,
-    Math.PI * 2
-  );
-  ctx.fill();
-
-  /* Neck */
-  ctx.fillStyle = "#a96d52";
-  ctx.save();
-  ctx.translate(shoulderX + 1 * scale, shoulderY - 2 * scale);
-  ctx.rotate(0.3);
-  ctx.fillRect(-3 * scale, -4 * scale, 8 * scale, 8 * scale);
-  ctx.restore();
-
-  /* Far arm reaching down to the grip */
-  ctx.strokeStyle = "#1c2e42";
-  ctx.lineWidth = 6 * scale;
-  ctx.lineCap = "round";
-
-  ctx.beginPath();
-  ctx.moveTo(shoulderX - 2 * scale, shoulderY + 2 * scale);
-  ctx.lineTo(elbowX - 2 * scale, elbowY + 2 * scale);
-  ctx.lineTo(handX - 2 * scale, handY + 2 * scale);
-  ctx.stroke();
-
-  /* Helmet, tilted forward into the wind */
-  ctx.save();
-  ctx.translate(headX, headY);
-  ctx.rotate(0.28);
-
-  ctx.fillStyle = "#111a27";
-  ctx.beginPath();
-  ctx.arc(0, 3 * scale, 13 * scale, Math.PI, Math.PI * 2);
-  ctx.lineTo(13 * scale, 8 * scale);
-  ctx.lineTo(-13 * scale, 8 * scale);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.fillStyle = "#8fc5d5";
-  ctx.beginPath();
-  ctx.roundRect(-9 * scale, 1 * scale, 19 * scale, 6.5 * scale, 3 * scale);
-  ctx.fill();
-
-  ctx.fillStyle = "rgba(9,23,36,0.75)";
-  ctx.fillRect(-7 * scale, 2 * scale, 15 * scale, 3.6 * scale);
-
-  ctx.strokeStyle = "#ff6d4f";
-  ctx.lineWidth = 2 * scale;
-  ctx.beginPath();
-  ctx.arc(0, 2 * scale, 9.5 * scale, Math.PI * 1.1, Math.PI * 1.75);
-  ctx.stroke();
-
-  ctx.restore();
-
-  /* Near arm, drawn last so it sits over the torso and helmet strap */
-  ctx.strokeStyle = "#233a51";
-  ctx.lineWidth = 6.5 * scale;
-  ctx.lineCap = "round";
-
-  ctx.beginPath();
-  ctx.moveTo(shoulderX + 2 * scale, shoulderY + 1 * scale);
-  ctx.lineTo(elbowX, elbowY);
-  ctx.lineTo(handX, handY);
-  ctx.stroke();
-
-  /* Gloves */
-  ctx.fillStyle = "#080d16";
-
-  ctx.beginPath();
-  ctx.arc(handX - 2 * scale, handY + 2 * scale, 3.4 * scale, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.arc(handX, handY, 3.8 * scale, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.restore();
-}
 
 function drawPlayerShield(scale) {
   const pulse =
@@ -3427,6 +3274,10 @@ function updateHUD() {
   }
 
   const powerupLabel = $("#hud-powerup-name");
+  const hasActivePowerup =
+    PLAYER.shieldTime > 0 ||
+    PLAYER.nitroTime > 0 ||
+    PLAYER.multiplierTime > 0;
 
   if (powerupLabel) {
     if (PLAYER.shieldTime > 0) {
@@ -3435,8 +3286,23 @@ function updateHUD() {
       powerupLabel.textContent = "NITRO";
     } else if (PLAYER.multiplierTime > 0) {
       powerupLabel.textContent = "DOUBLE SCORE";
-    } else {
-      powerupLabel.textContent = "NO POWERUP";
+    }
+  }
+
+  const powerupPanel = $("#hud-powerup");
+
+  if (powerupPanel) {
+    powerupPanel.classList.toggle("hidden", !hasActivePowerup);
+  }
+
+  const comboPanel = $("#hud-combo");
+
+  if (comboPanel) {
+    const comboActive = game.combo >= 2;
+    comboPanel.classList.toggle("hidden", !comboActive);
+
+    if (comboActive) {
+      setText("#hud-combo-badge", `X${game.combo}`);
     }
   }
 
@@ -3638,7 +3504,7 @@ function renderLeaderboard() {
 
     const name = document.createElement("div");
     name.className = "leaderboard-name";
-    name.textContent = entry.name || "RIDER";
+    name.textContent = entry.name || "DRIVER";
 
     const date = document.createElement("div");
     date.className = "leaderboard-date";
@@ -3670,7 +3536,7 @@ function saveCurrentScore() {
   const name =
     input && input.value.trim()
       ? input.value.trim()
-      : "RIDER";
+      : "DRIVER";
 
   saveLeaderboardEntry(name, game.score);
 
@@ -3980,7 +3846,7 @@ function runSplashSequence() {
     "INITIALIZING ROAD SYSTEM",
     "LOADING TRAFFIC NETWORK",
     "BUILDING ABUJA CITY",
-    "CALIBRATING RIDER",
+    "CALIBRATING ROLLS-ROYCE",
     "SYSTEM READY"
   ];
 
